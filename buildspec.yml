@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-northeast-3 | docker login --username AWS --password-stdin 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build --build-arg REACT_APP_API_URL_LEAVE=$REACT_APP_API_URL_LEAVE --build-arg REACT_APP_API_URL_USER=$REACT_APP_API_URL_USER --build-arg FRONTEND_PORT=3000 -t g3-lms-frontend:frontend .
+      - docker tag g3-lms-frontend:frontend 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/g3-lms-frontend:frontend
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/g3-lms-frontend:frontend
+      - echo Writing image definitions file...
+      - printf '[{"name":"g3-lms-frontend","imageUri":"%s"}]' 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/g3-lms-frontend:frontend > imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
