@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: frontend-deployment
   namespace: g3-eks
   labels:
     app: fms
@@ -16,22 +16,20 @@ spec:
         app: fms
     spec:
       containers:
-        - name: fmscontainer
-          image: jayashreerao15/fms:latest
+        - name: g3-eks-codepipeline
+          image: 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/g3-eks-codepipeline:frontend
           ports:
             - containerPort: 3000
           env:
-            - name: REACT_APP_API_URL_USER
-              value: "https://rapymcwl93.execute-api.ap-northeast-3.amazonaws.com/UserProfile/"
             - name: REACT_APP_API_URL_LEAVE
-              value: "https://rapymcwl93.execute-api.ap-northeast-3.amazonaws.com/leave_backend/"
-            - name: FRONTEND_PORT
-              value: "3000"
+              value: "http://leave-service.g3-eks.svc.cluster.local:8080"
+            - name: REACT_APP_API_URL_USER
+              value: "http://user-service.g3-eks.svc.cluster.local:8082"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: leave
+  name: leave-deployment
   namespace: g3-eks
   labels:
     app: lms
@@ -46,22 +44,15 @@ spec:
         app: lms
     spec:
       containers:
-        - name: lmscontainer
-          image: jayashreerao15/lms:latest
+        - name: leave-service
+          image: 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/leave-service:latest
           ports:
             - containerPort: 8080
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://g3-rds.cjas2m28ehia.ap-northeast-3.rds.amazonaws.com:3306/Holiday?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
-            - name: SPRING_DATASOURCE_USERNAME
-              value: "admin"
-            - name: LEAVE_SERVICE_PORT
-              value: "8080"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: user-deployment
   namespace: g3-eks
   labels:
     app: ums
@@ -76,14 +67,7 @@ spec:
         app: ums
     spec:
       containers:
-        - name: umscontainer
-          image: jayashreerao15/ums:latest
+        - name: user-service
+          image: 124355663661.dkr.ecr.ap-northeast-3.amazonaws.com/user-service:latest
           ports:
             - containerPort: 8082
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://g3-rds.cjas2m28ehia.ap-northeast-3.rds.amazonaws.com:3306/Holiday?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
-            - name: SPRING_DATASOURCE_USERNAME
-              value: "admin"
-            - name: USER_SERVICE_PORT
-              value: "8082"
