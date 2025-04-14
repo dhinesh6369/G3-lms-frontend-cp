@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: g3-eks
+  labels:
+    app: fms
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fms
+  template:
+    metadata:
+      labels:
+        app: fms
+    spec:
+      containers:
+        - name: fmscontainer
+          image: jayashreerao15/fms:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_API_URL_USER
+              value: "https://rapymcwl93.execute-api.ap-northeast-3.amazonaws.com/UserProfile/"
+            - name: REACT_APP_API_URL_LEAVE
+              value: "https://rapymcwl93.execute-api.ap-northeast-3.amazonaws.com/leave_backend/"
+            - name: FRONTEND_PORT
+              value: "3000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leave
+  namespace: g3-eks
+  labels:
+    app: lms
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lms
+  template:
+    metadata:
+      labels:
+        app: lms
+    spec:
+      containers:
+        - name: lmscontainer
+          image: jayashreerao15/lms:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://g3-rds.cjas2m28ehia.ap-northeast-3.rds.amazonaws.com:3306/Holiday?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "admin"
+            - name: LEAVE_SERVICE_PORT
+              value: "8080"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: g3-eks
+  labels:
+    app: ums
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ums
+  template:
+    metadata:
+      labels:
+        app: ums
+    spec:
+      containers:
+        - name: umscontainer
+          image: jayashreerao15/ums:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://g3-rds.cjas2m28ehia.ap-northeast-3.rds.amazonaws.com:3306/Holiday?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "admin"
+            - name: USER_SERVICE_PORT
+              value: "8082"
